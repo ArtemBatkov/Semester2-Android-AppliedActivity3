@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="StudentsCourses.Views.MainPage"
+             xmlns:views="clr-namespace:StudentsCourses.Views"
+             xmlns:viewmodels="clr-namespace:StudentsCourses.ViewModels"
+             xmlns:models="clr-namespace:StudentsCourses.Models"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+
+
+    <ContentPage.Resources>
+        <Color x:Key="cardtextbg">#181818</Color>
+        <Color x:Key="sortbg">#282828</Color>
+        <Color x:Key="cardbg">#c0c0c0</Color>
+        <Color x:Key="highlight_quantity">#E53935</Color>
+        <Color x:Key="pickerbg">#5C5B57</Color>
+        <Color x:Key="btnsortdate">#666666</Color>
+        <Color x:Key="btnsortpopular">#2A3439</Color>
+    </ContentPage.Resources>
+
+    <ContentPage.BindingContext>
+        <viewmodels:StudentsViewModel/>
+    </ContentPage.BindingContext>
+
+    <ContentPage.Behaviors>
+        <toolkit:EventToCommandBehavior
+            EventName="Appearing"
+            Command="{Binding PageAppearingCommand}"/>
+    </ContentPage.Behaviors>
+
+
+
+    <StackLayout Spacing="30">
+        <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
+        <Entry Placeholder="Insert the student Name" Text="{Binding EntrySurname}"/>
+        <Button Text="Submit" Command="{Binding SubmitStudent}"/>
+
+        <CollectionView 
+              BackgroundColor="{StaticResource cardbg}"
+            ItemsSource="{Binding StudentList}" >
+
+            <CollectionView.ItemTemplate >
+                <DataTemplate>
+                    <StackLayout>
+                        <Label Text="{Binding StudentId}, StringFormat='Id = {.}'}" TextColor="{StaticResource cardtextbg}"/>
+                        <Label Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}"/>
+                        <Label Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}"/>
+                    </StackLayout>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+
+    </StackLayout>
+
+</ContentPage>
