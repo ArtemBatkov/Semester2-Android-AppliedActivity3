@@ -12,7 +12,7 @@ public partial class App : Application
 
 		MainPage = new AppShell();
 
-        MyRepo = repo;
+        MyRepo = repo;//
 
     }
 }
