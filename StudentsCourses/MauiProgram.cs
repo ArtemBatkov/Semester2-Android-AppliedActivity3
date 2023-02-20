@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
-using SQLite;
+//using SQLite; //related to SQLite
 
 using StudentsCourses.Models;
-using StudentsCourses.DataBase;
+//using StudentsCourses.DataBase;  //related to SQLite
 
 using System;
 using System.IO;
@@ -15,7 +15,7 @@ public static class MauiProgram
     //FileAccessHelper.GetLocalFilePath("people.db3");
     public static string filename = "students";
 
-    public static SQLiteConnection conn;
+    //public static SQLiteConnection conn;
 
 
     public static MauiApp CreateMauiApp()
@@ -36,9 +36,9 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        string dbPath = Repository.DBPATH;
-        builder.Services.AddSingleton<Repository>(s => ActivatorUtilities.CreateInstance<Repository>(s, dbPath));
-         
+        // string dbPath = Repository.DBPATH; //related to SQLite
+        //builder.Services.AddSingleton<Repository>(s => ActivatorUtilities.CreateInstance<Repository>(s, dbPath));
+
 
         return builder.Build();
 	}

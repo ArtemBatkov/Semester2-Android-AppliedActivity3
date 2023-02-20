@@ -28,30 +28,76 @@
             Command="{Binding PageAppearingCommand}"/>
     </ContentPage.Behaviors>
 
+ 
+    <StackLayout Orientation="Horizontal"
+                 HorizontalOptions="FillAndExpand">
+        
+        <ScrollView>
+            <StackLayout Spacing="30">        
+                <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
+                <Entry Placeholder="Insert the student Surname" Text="{Binding EntrySurname}"/>
+                <Entry Placeholder="Insert the student GPA score" Text="{Binding EntryStudentGPA}"/>
+                <Button Text="Submit" Command="{Binding SubmitStudent}"/>
+            
+                <CollectionView 
+                      BackgroundColor="{StaticResource cardbg}"
+                    ItemsSource="{Binding StudentList}" >           
+
+                    <CollectionView.ItemTemplate >
+                        <DataTemplate>
+                            <StackLayout>
+                                <Label Text="{Binding StudentId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}" />
+                                <Label Text="{Binding StudentGPA}" TextColor="{StaticResource cardtextbg}"
+                                       Margin="10"/>
+                            </StackLayout>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>        
+            </StackLayout>
+        </ScrollView>
 
 
-    <StackLayout Spacing="30">
-        <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
-        <Entry Placeholder="Insert the student Name" Text="{Binding EntrySurname}"/>
-        <Button Text="Submit" Command="{Binding SubmitStudent}"/>
+        <ScrollView>
+            <StackLayout Spacing="30">
+                <Entry Placeholder="Insert the course name"  
+                       Text="{Binding EntryCourseName}"
+                       Keyboard="Text"/>
+                
+                <Entry Placeholder="Insert the course length" 
+                       Text="{Binding EntryCourseLength}"
+                       Keyboard="Telephone"/>
+                
+                <Entry Placeholder="Insert the course cost" 
+                       Text="{Binding EntryCourseCost}"
+                       Keyboard="Numeric"/>
+                
+                <Button Text="Submit" Command="{Binding SubmitCourse}"/>
 
-        <CollectionView 
-              BackgroundColor="{StaticResource cardbg}"
-            ItemsSource="{Binding StudentList}" >
+                <CollectionView 
+                      BackgroundColor="{StaticResource cardbg}"
+                    ItemsSource="{Binding CourseList}" >
 
-            <CollectionView.ItemTemplate >
-                <DataTemplate>
-                    <StackLayout>
-                        <Label Text="{Binding StudentId}, StringFormat='Id = {.}'}" TextColor="{StaticResource cardtextbg}"/>
-                        <Label Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}"/>
-                        <Label Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}"/>
-                    </StackLayout>
+                    <CollectionView.ItemTemplate >
+                        <DataTemplate>
+                            <StackLayout>
+                                <Label Text="{Binding CourseId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseName, StringFormat='Course name = {0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseLength,StringFormat='{0:D0} semesters'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseCost,StringFormat='${0:F2}'}" TextColor="{StaticResource cardtextbg}"
+                                       Margin="0,0,0,10"/>                                       
+                            </StackLayout>
 
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </StackLayout>
+        </ScrollView>
 
 
     </StackLayout>
-
+    
+    
 </ContentPage>
