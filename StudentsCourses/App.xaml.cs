@@ -1,5 +1,7 @@
 ﻿//using StudentsCourses.DataBase;  //related to SQLite
 
+using StudentsCourses.Services;
+
 namespace StudentsCourses;
 
 public partial class App : Application
@@ -10,7 +12,9 @@ public partial class App : Application
     {
 		InitializeComponent();
 
-		MainPage = new AppShell();
+        DependencyService.Register<StudentsCoursesDataStoreSqlite>();
+
+        MainPage = new AppShell();
 
        // MyRepo = repo;//
 

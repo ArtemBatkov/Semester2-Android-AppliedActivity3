@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,8 @@ namespace StudentsCourses.Models
     class Course
     {
         private int _id;
+
+        [PrimaryKey, AutoIncrement]
         public int CourseId { get => _id; set => _id = value; }
 
         private string _name;
@@ -21,16 +24,5 @@ namespace StudentsCourses.Models
 
         private double _cost;
         public double CourseCost { get => _cost; set => _cost = value; }
-
-
-        public Course(int id, string name, int length, double cost )
-        {
-            this.CourseId = id;
-            this.CourseName = name;
-            this.CourseCost= cost;
-            this.CourseLength = length;
-        }
-
-       
     }
 }

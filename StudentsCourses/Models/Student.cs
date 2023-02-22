@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLite;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +21,7 @@ namespace StudentsCourses.Models
 
         private int _id;
         //[PrimaryKey, AutoIncrement, Column("_id")]  //related to SQLite
+        [PrimaryKey, AutoIncrement]
         public int StudentId { get => _id; set => _id = value; }
 
         private string _surname;
@@ -28,13 +30,6 @@ namespace StudentsCourses.Models
 
         private float _gpa;
         public float StudentGPA { get => _gpa; set => _gpa = value; }
-        public Student(int id, string name, string surname, float gpa)
-        {
-            this.StudentId = id;
-            this.StudentName = name;
-            this.StudentSurname = surname;
-            this.StudentGPA = gpa;
-        }
 
         public string getStudentName() => StudentName;
         public string getStudentSurname() => StudentSurname;

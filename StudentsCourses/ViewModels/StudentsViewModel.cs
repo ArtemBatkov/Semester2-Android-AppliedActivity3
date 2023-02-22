@@ -9,11 +9,15 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using StudentsCourses.Models;
 using System.Globalization;
+using StudentsCourses.Services;
 
 namespace StudentsCourses.ViewModels
 {
     class StudentsViewModel
     {
+
+        public IStudentsCoursesDataStore SqliteDataStore => DependencyService.Get<IStudentsCoursesDataStore>();
+
         public ObservableRangeCollection<Student> StudentList { get; set; }
         public ObservableRangeCollection<Course> CourseList { get; set; }
 
@@ -34,6 +38,15 @@ namespace StudentsCourses.ViewModels
         {
             //when the page starting
             //
+
+            StudentList.Clear();
+            var students = await SqliteDataStore.GetStudentsAsync();
+            StudentList.AddRange(students);
+
+            CourseList.Clear();
+            var courses = await SqliteDataStore.GetCoursesAsync();
+            CourseList.AddRange(courses);
+
         }
 
 
@@ -117,35 +130,38 @@ namespace StudentsCourses.ViewModels
 
         
 
-        private void onStudentSubmitClicked()
+        private async void onStudentSubmitClicked()
         {
-            try { 
-                int id = StudentList.Count();
+            try
+            {
                 string name = _pageStudentName;
                 string surname = _pageStudentSurname;
-                float gpa = float.Parse(_pageStudentGPA,CultureInfo.InvariantCulture.NumberFormat);
+                float gpa = float.Parse(_pageStudentGPA, CultureInfo.InvariantCulture.NumberFormat);
                 if (String.IsNullOrEmpty(surname)) return;
                 if (String.IsNullOrEmpty(name)) return;
-                if (gpa > 4 || gpa < 0) return;                
-                var student = new Student(id, name, surname,gpa);
+                if (gpa > 4 || gpa < 0) return;
+                var student = new Student() { StudentName = name, StudentSurname = surname, StudentGPA = gpa };
                 StudentList.Add(student);
+
+                await SqliteDataStore.SaveStudentAsync(student);
             }
             catch(Exception ex) { return; }
         }
 
 
-        private void onCourseSubmitClicked()
+        private async void onCourseSubmitClicked()
         {
             try { 
-                int id = CourseList.Count();
                 string name = _pageCourseName;
                 int length =  Int32.Parse(_pageCourseLength);
                 double cost = Double.Parse(_pageCourseCost, CultureInfo.InvariantCulture.NumberFormat);
                 if(String.IsNullOrEmpty(name)) return;
                 if (length <= 0) return;
                 if(cost < 0) return;
-                var course = new Course(id,name,length, cost);
-            CourseList.Add(course);
+                var course = new Course() { CourseName = name, CourseLength = length, CourseCost = cost };
+                CourseList.Add(course);
+
+                await SqliteDataStore.SaveCourseAsync(course);
             }
             catch(Exception ex)
             {
