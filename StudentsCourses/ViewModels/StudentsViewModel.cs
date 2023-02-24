@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using StudentsCourses.Models;
 using System.Globalization;
 using StudentsCourses.Services;
+using Command = MvvmHelpers.Commands.Command;
 
 namespace StudentsCourses.ViewModels
 {
@@ -25,6 +26,10 @@ namespace StudentsCourses.ViewModels
         public ICommand SubmitStudent { get; set; }
         public ICommand SubmitCourse { get; set; }
 
+        public ICommand DeleteCoursesCommand { get; set; }
+        public ICommand DeleteStudentsCommand { get; set; }
+
+        public ICommand EditStudents { get; set; }
         public StudentsViewModel()
         {
             PageAppearingCommand = new AsyncCommand(PageAppearing);
@@ -32,6 +37,45 @@ namespace StudentsCourses.ViewModels
             SubmitCourse = new MvvmHelpers.Commands.Command(() => onCourseSubmitClicked());
             StudentList = new ObservableRangeCollection<Student>();
             CourseList = new ObservableRangeCollection<Course>();
+            DeleteCoursesCommand = new Command(onDeleteCourseCommand);
+            DeleteStudentsCommand = new Command(onDeleteStudentCommand);
+            EditStudents = new Command(onEditStudents);
+        }
+
+        private void onEditStudents(object obj)
+        {
+            var b = 3 + 3;
+            
+        }
+
+        private async void onDeleteStudentCommand(object obj) {
+            Student student = obj as Student;
+            int index = StudentList.IndexOf(student);
+            if (index < 0) return;
+            //remove from DB
+            await SqliteDataStore.DeleteStudentAsync(student);
+            //remove from collection
+            StudentList.RemoveAt(index);
+
+            var students = await SqliteDataStore.GetStudentsAsync();
+            int quantity = students.Count();
+            if (quantity < 1) _ = SqliteDataStore.RedefinedStudentsPK();
+        }
+
+
+        private async void onDeleteCourseCommand(object obj)
+        {
+            Course course = obj as Course;
+            int index = CourseList.IndexOf(course);
+            if (index < 0) return;
+            //remove from DB
+            await SqliteDataStore.DeleteCourseAsync(course);
+            //remove from collection
+            CourseList.RemoveAt(index);
+
+            var courses = await SqliteDataStore.GetCoursesAsync();
+            int quantity = courses.Count();
+            if (quantity < 1) _ = SqliteDataStore.RedefinedCoursesPK();
         }
 
         public async Task Refresh()
@@ -117,6 +161,8 @@ namespace StudentsCourses.ViewModels
         }
 
         private string _pageCourseCost;
+       
+
         public string EntryCourseCost
         {
             set
@@ -168,6 +214,9 @@ namespace StudentsCourses.ViewModels
                 return;
             }
         }
+
+
+        
 
     }
 }

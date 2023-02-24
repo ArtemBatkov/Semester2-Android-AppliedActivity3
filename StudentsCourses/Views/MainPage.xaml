@@ -5,10 +5,15 @@
              xmlns:views="clr-namespace:StudentsCourses.Views"
              xmlns:viewmodels="clr-namespace:StudentsCourses.ViewModels"
              xmlns:models="clr-namespace:StudentsCourses.Models"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit" >
+             
 
 
     <ContentPage.Resources>
+
+        
+
+
         <Color x:Key="cardtextbg">#181818</Color>
         <Color x:Key="sortbg">#282828</Color>
         <Color x:Key="cardbg">#c0c0c0</Color>
@@ -29,10 +34,15 @@
     </ContentPage.Behaviors>
 
  
-    <StackLayout Orientation="Horizontal"
-                 HorizontalOptions="FillAndExpand">
-        
-        <ScrollView>
+    <!-- <StackLayout Orientation="Horizontal"
+                 HorizontalOptions="FillAndExpand">-->
+    <Grid ColumnSpacing="3" RowSpacing="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+         
+        <ScrollView Grid.Column="0" Grid.Row="0">
             <StackLayout Spacing="30">        
                 <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
                 <Entry Placeholder="Insert the student Surname" Text="{Binding EntrySurname}"/>
@@ -40,27 +50,103 @@
                 <Button Text="Submit" Command="{Binding SubmitStudent}"/>
             
                 <CollectionView 
-                      BackgroundColor="{StaticResource cardbg}"
-                    ItemsSource="{Binding StudentList}" >           
+                        x:Name="CVStudents"                        
+                        ItemsSource="{Binding StudentList}"
+                        Header="Scroll left to delete">           
 
-                    <CollectionView.ItemTemplate >
+                    <CollectionView.ItemTemplate>
                         <DataTemplate>
-                            <StackLayout>
-                                <Label Text="{Binding StudentId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
-                                <Label Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}"/>
-                                <Label Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}" />
-                                <Label Text="{Binding StudentGPA}" TextColor="{StaticResource cardtextbg}"
-                                       Margin="10"/>
-                            </StackLayout>
+
+                            <SwipeView Threshold="200">
+                                <SwipeView.LeftItems>
+                                    
+                                    <SwipeItems>
+                                        <SwipeItem 
+                                            Command="{Binding Source={x:Reference CVStudents}, Path=BindingContext.DeleteStudentsCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Text="Delete"
+                                            BackgroundColor="Red"
+                                            IconImageSource="delete"/>
+                                    </SwipeItems>
+
+                                </SwipeView.LeftItems>
+
+                                <Grid  ColumnDefinitions="3*,1*" BackgroundColor="{StaticResource cardbg}" RowSpacing="3">
+                                     
+                                    <StackLayout Grid.Row="0" Grid.Column="0" x:Name="StudentStack" 
+                                                 Margin="20"
+                                                 >                                         
+                                        <Label x:Name ="idlab" Text="{Binding StudentId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                        <Entry Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}" IsReadOnly="True"/>
+                                        <Entry Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}" IsReadOnly="True"/>
+                                        <Entry Text="{Binding StudentGPA}" TextColor="{StaticResource cardtextbg}"
+                                               IsReadOnly="True"
+                                               Margin="10"/>
+                                    </StackLayout>
+                                    <ImageButton x:Name="edit"   Grid.Row="0" Grid.Column="1" 
+                                                 Command="{Binding Source={x:Reference StudentStack}, Path=BindingContext.EditStudents}"
+                                                 CommandParameter="{Binding .}"
+                                                 HeightRequest="{Binding Height, Source={x:Reference idlab}}"                                               
+                                                 Source="edit.svg"  
+                                                 BackgroundColor="CornflowerBlue">
+                                                 
+                                                  
+                                                                                     
+                                        
+                                          <!-- 
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroup x:Name="CommonStates">
+                                                <VisualState x:Name="Normal">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Opacity" Value="1" />                           
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                                <VisualState x:Name="Pressed">
+                                                    <VisualState.Setters>
+                                                        <Setter Property="Opacity" Value="0.5" />                            
+                                                    </VisualState.Setters>
+                                                </VisualState>
+                                            </VisualStateGroup>
+                                        </VisualStateManager.VisualStateGroups>
+                                        -->
+                                        <VisualStateManager.VisualStateGroups>
+                                            <VisualStateGroupList>
+                                                <VisualStateGroup x:Name="CommonStates">
+                                                   
+                                                    <VisualState x:Name="Normal">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="Opacity" Value="1"/>
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+
+                                                    <VisualState x:Name="Pressed">
+                                                        <VisualState.Setters>
+                                                            <Setter Property="Opacity" Value="0.5"/>
+                                                        </VisualState.Setters>
+                                                    </VisualState>
+
+                                                </VisualStateGroup>
+                                            </VisualStateGroupList>
+                                        </VisualStateManager.VisualStateGroups>
+                                    </ImageButton>
+                                     
+
+                                </Grid>
+
+                            </SwipeView>                       
 
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>        
             </StackLayout>
         </ScrollView>
+        <!-- STUDENTS END -->
+        
+        
+        
+        <!-- COURSES -->
 
-
-        <ScrollView>
+        <ScrollView Grid.Column="1" Grid.Row="0">
             <StackLayout Spacing="30">
                 <Entry Placeholder="Insert the course name"  
                        Text="{Binding EntryCourseName}"
@@ -77,27 +163,49 @@
                 <Button Text="Submit" Command="{Binding SubmitCourse}"/>
 
                 <CollectionView 
-                      BackgroundColor="{StaticResource cardbg}"
-                    ItemsSource="{Binding CourseList}" >
+                       x:Name="CVCourses"
+                       BackgroundColor="{StaticResource cardbg}"
+                       ItemsSource="{Binding CourseList}" 
+                       Header="Scroll right to delete">
 
                     <CollectionView.ItemTemplate >
                         <DataTemplate>
-                            <StackLayout>
-                                <Label Text="{Binding CourseId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
-                                <Label Text="{Binding CourseName, StringFormat='Course name = {0}'}" TextColor="{StaticResource cardtextbg}"/>
-                                <Label Text="{Binding CourseLength,StringFormat='{0:D0} semesters'}" TextColor="{StaticResource cardtextbg}"/>
-                                <Label Text="{Binding CourseCost,StringFormat='${0:F2}'}" TextColor="{StaticResource cardtextbg}"
-                                       Margin="0,0,0,10"/>                                       
-                            </StackLayout>
+
+                            <SwipeView Threshold="200">
+                                <SwipeView.RightItems>
+                                    <SwipeItems>
+                                        <SwipeItem 
+                                            Command="{Binding Source={x:Reference CVCourses}, Path=BindingContext.DeleteCoursesCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Text="Delete"
+                                            BackgroundColor="Red"
+                                            IconImageSource="delete"/>
+                                    </SwipeItems>
+                                    
+                                </SwipeView.RightItems>
+
+                                <StackLayout>
+                                    <Label Text="{Binding CourseId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                    <Label Text="{Binding CourseName, StringFormat='Course name = {0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                    <Label Text="{Binding CourseLength,StringFormat='{0:D0} semesters'}" TextColor="{StaticResource cardtextbg}"/>
+                                    <Label Text="{Binding CourseCost,StringFormat='${0:F2}'}" TextColor="{StaticResource cardtextbg}"
+                                               Margin="0,0,0,10"/>
+                                </StackLayout>
+
+
+                            </SwipeView>
+                            
 
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </StackLayout>
         </ScrollView>
-
-
-    </StackLayout>
+   
+    </Grid>
+    
+    <!--
+    </StackLayout> -->
     
     
 </ContentPage>

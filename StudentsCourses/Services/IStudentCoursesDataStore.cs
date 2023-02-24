@@ -13,5 +13,8 @@ namespace StudentsCourses.Services
         Task<Course> GetCourseAsync(int courseId);
         Task<int> SaveCourseAsync(Course course);
         Task<int> DeleteCourseAsync(Course course);
+
+        Task  RedefinedCoursesPK();
+        Task RedefinedStudentsPK();
     }
 }

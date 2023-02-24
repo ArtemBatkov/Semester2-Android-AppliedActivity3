@@ -90,5 +90,17 @@ namespace StudentsCourses.Services
             await Init();
             return await Database.DeleteAsync(course);
         }
+
+        public async Task RedefinedCoursesPK()
+        {
+            await Database.DropTableAsync<Course>();
+            await Database.CreateTableAsync<Course>();
+        }
+
+        public async Task RedefinedStudentsPK()
+        {
+            await Database.DropTableAsync<Student>();
+            await Database.CreateTableAsync<Student>();
+        }
     }
 }
