@@ -11,6 +11,7 @@ using StudentsCourses.Models;
 using System.Globalization;
 using StudentsCourses.Services;
 using Command = MvvmHelpers.Commands.Command;
+using CommunityToolkit.Mvvm.Input;
 
 namespace StudentsCourses.ViewModels
 {
@@ -29,7 +30,13 @@ namespace StudentsCourses.ViewModels
         public ICommand DeleteCoursesCommand { get; set; }
         public ICommand DeleteStudentsCommand { get; set; }
 
+        public ICommand SelectCommand { get; }
+
         public ICommand EditStudents { get; set; }
+
+
+        public ICommand EditStudents2 { get; set; }
+        
         public StudentsViewModel()
         {
             PageAppearingCommand = new AsyncCommand(PageAppearing);
@@ -39,13 +46,26 @@ namespace StudentsCourses.ViewModels
             CourseList = new ObservableRangeCollection<Course>();
             DeleteCoursesCommand = new Command(onDeleteCourseCommand);
             DeleteStudentsCommand = new Command(onDeleteStudentCommand);
+
+            //EditStudents = new AsyncRelayCommand<StackLayout>(onEditStudents);
             EditStudents = new Command(onEditStudents);
+
+            SelectCommand = new AsyncRelayCommand<Student>(SelectAsync);
+
+            //EditStudents2 = new AsyncRelayCommand<StackLayout stack>(onEditStudents2);
+
+        }
+        private async Task SelectAsync(Student student)
+        {
+
         }
 
-        private void onEditStudents(object obj)
-        {
-            var b = 3 + 3;
-            
+
+
+            private void onEditStudents(object obj)
+        {            
+            var b = 3 + 4;
+   
         }
 
         private async void onDeleteStudentCommand(object obj) {
