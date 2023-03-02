@@ -13,6 +13,7 @@ using StudentsCourses.Services;
 using Command = MvvmHelpers.Commands.Command;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Behaviors;
+using System.Collections.Specialized;
 
 namespace StudentsCourses.ViewModels
 {
@@ -79,6 +80,8 @@ namespace StudentsCourses.ViewModels
             var entryStudentSurname = stacklayout.Children[2] as Entry;
             var entryStudentGPA = stacklayout.Children[3] as Entry;
 
+            var entryStudentId = stacklayout.Children[4] as Entry;
+
             //disable access for editing
             entryStudentName.IsReadOnly = true;
             entryStudentSurname.IsReadOnly = true;
@@ -91,23 +94,22 @@ namespace StudentsCourses.ViewModels
             editbutton.IsVisible = true;
 
             //update DB
-            var students = StudentList;
-            foreach(var student in students)
+            var student = StudentList.FirstOrDefault(s => s.StudentId == Convert.ToInt32(entryStudentId.Text));
+            try
             {
-                try { 
-                var name = student.StudentName;
-                var surname = student.StudentSurname;
-                var gpa = student.StudentGPA;
-                if (String.IsNullOrEmpty(name)||String.IsNullOrWhiteSpace(name)) continue;
-                if (String.IsNullOrEmpty(surname)|| String.IsNullOrWhiteSpace(surname)) continue;
-                if (gpa > 4 || gpa < 0) continue;
+                student.StudentName = student.StudentName.Trim();
+                student.StudentSurname = student.StudentSurname.Trim();
+
+                if (String.IsNullOrEmpty(student.StudentName)) return;
+                if (String.IsNullOrEmpty(student.StudentSurname)) return;
+                if (student.StudentGPA > 4 || student.StudentGPA < 0) return;
+
                 await SqliteDataStore.UpdateStudentAsync(student);
-                }
-                catch (Exception ex)
-                {
-                    continue;
-                }
-            }            
+            }
+            catch (Exception ex)
+            {
+                return;
+            }         
         }
 
         
@@ -187,6 +189,18 @@ namespace StudentsCourses.ViewModels
         {
             //page apearing is linked with the refresh relates to the page
             await Refresh();
+        }
+
+        private string _pageStudentId;
+        public string EntryStudentId
+        {
+            set
+            {
+                if (_pageStudentId != value)
+                {
+                    _pageStudentId = value;
+                }
+            }
         }
         private string _pageStudentName;
         public string EntryName {             
@@ -268,8 +282,8 @@ namespace StudentsCourses.ViewModels
         {
             try
             {
-                string name = _pageStudentName;
-                string surname = _pageStudentSurname;
+                string name = _pageStudentName.Trim();
+                string surname = _pageStudentSurname.Trim();
                 float gpa = float.Parse(_pageStudentGPA, CultureInfo.InvariantCulture.NumberFormat);
                 if (String.IsNullOrEmpty(surname)) return;
                 if (String.IsNullOrEmpty(name)) return;

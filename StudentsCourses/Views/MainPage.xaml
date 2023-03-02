@@ -41,12 +41,12 @@
         </Grid.ColumnDefinitions>
          
         <ScrollView Grid.Column="0" Grid.Row="0">
-            <StackLayout Spacing="30">        
+            <StackLayout Spacing="30">
                 <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
                 <Entry Placeholder="Insert the student Surname" Text="{Binding EntrySurname}"/>
                 <Entry Placeholder="Insert the student GPA score" Text="{Binding EntryStudentGPA}"/>
                 <Button Text="Submit" Command="{Binding SubmitStudent}"/>
-            
+
                 <CollectionView 
                         x:Name="CVStudents"                        
                         ItemsSource="{Binding StudentList}"
@@ -83,6 +83,7 @@
                                         <Entry Text="{Binding StudentGPA}" TextColor="{StaticResource cardtextbg}"
                                                IsReadOnly="True"
                                                Margin="10"/>
+                                        <Entry Text="{Binding StudentId}" IsVisible="false"/>
                                     </StackLayout>
                                     <!-- Command="{Binding Source={x:Reference StudentStack}, Path=BindingContext.EditStudents}" -->
                                     <!-- Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=EditStudents}"-->
