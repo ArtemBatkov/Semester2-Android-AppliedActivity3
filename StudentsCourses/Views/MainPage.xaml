@@ -41,6 +41,8 @@
         </Grid.ColumnDefinitions>
          
         <ScrollView Grid.Column="0" Grid.Row="0">
+
+            
             <StackLayout Spacing="30">
                 <Entry Placeholder="Insert the student Name"  Text="{Binding EntryName}"/>
                 <Entry Placeholder="Insert the student Surname" Text="{Binding EntrySurname}"/>
@@ -51,12 +53,16 @@
                         x:Name="CVStudents"                        
                         ItemsSource="{Binding StudentList}"
                         Header="Scroll left to delete"
-                        SelectionChangedCommand="{Binding SelectCommand}">
+                        SelectionChangedCommand="{Binding SelectCommand}" 
+                        >
+                        
+                      
 
-                    <CollectionView.ItemTemplate>
+                    <CollectionView.ItemTemplate >
                         <!--x:DataType="models:Student"-->
+                        
                         <DataTemplate >
-
+                             
                             <SwipeView Threshold="200">
                                 <SwipeView.LeftItems>                                    
                                     <SwipeItems>
@@ -133,8 +139,8 @@
 
                                 </Grid>
 
-                            </SwipeView>                       
-
+                            </SwipeView>
+                           
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>        

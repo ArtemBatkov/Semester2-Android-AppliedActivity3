@@ -289,9 +289,10 @@ namespace StudentsCourses.ViewModels
                 if (String.IsNullOrEmpty(name)) return;
                 if (gpa > 4 || gpa < 0) return;
                 var student = new Student() {  StudentName = name, StudentSurname = surname, StudentGPA = gpa };
-                StudentList.Add(student);
+                
 
                 await SqliteDataStore.SaveStudentAsync(student);
+                StudentList.Add(student);
             }
             catch(Exception ex) { return; }
         }
