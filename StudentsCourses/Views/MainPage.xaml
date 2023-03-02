@@ -11,10 +11,6 @@
 
     <ContentPage.Resources>
 
-        <ControlTemplate x:Key="StudentCardTemplate">
-            
-        </ControlTemplate>
-
 
         <Color x:Key="cardtextbg">#181818</Color>
         <Color x:Key="sortbg">#282828</Color>
@@ -80,9 +76,10 @@
                                     <StackLayout Grid.Row="0" Grid.Column="0" x:Name="StudentStack" 
                                                  Margin="20"
                                                  >                                                                                          
-                                        <Label x:Name ="idlab" Text="{Binding StudentId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                        <!--<Label x:Name ="idlab" Text="{Binding StudentId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>-->
+                                        <Label x:Name="idlab" Text="0" IsVisible="false"/>
                                         <Entry Text="{Binding StudentName}" TextColor="{StaticResource cardtextbg}" IsReadOnly="True"/>
-                                        <Entry Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}" IsReadOnly="True"/>
+                                        <Entry x:Name="surent"  Text="{Binding StudentSurname}" TextColor="{StaticResource cardtextbg}" IsReadOnly="True"/>
                                         <Entry Text="{Binding StudentGPA}" TextColor="{StaticResource cardtextbg}"
                                                IsReadOnly="True"
                                                Margin="10"/>
@@ -100,7 +97,7 @@
                                     <ImageButton x:Name="edit"   Grid.Row="0" Grid.Column="1"                                                
                                                  Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=EditStudents}"
                                                  CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"                                                 
-                                                 HeightRequest="{Binding Height, Source={x:Reference idlab}}"                                               
+                                                 HeightRequest="{Binding Height, Source={x:Reference surent}}"                                               
                                                  Source="edit.svg"  
                                                  BackgroundColor="CornflowerBlue">                                                                                            
                                  
@@ -124,7 +121,14 @@
                                             </VisualStateGroupList>
                                         </VisualStateManager.VisualStateGroups>
                                     </ImageButton>
-                                     
+                                    
+                                    <ImageButton x:Name="submit"   Grid.Row="0" Grid.Column="1"
+                                                 HeightRequest="{Binding Height, Source={x:Reference surent}}"                                       
+                                                 BackgroundColor="ForestGreen"
+                                                 IsVisible="false"                                                  
+                                                 Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=SubmitStudentChanges}"
+                                                 CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}">
+                                    </ImageButton>
 
                                 </Grid>
 

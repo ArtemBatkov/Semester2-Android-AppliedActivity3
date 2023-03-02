@@ -41,6 +41,17 @@ namespace StudentsCourses.Services
             return await Database.Table<Student>().Where(i => i.StudentId == studentId).FirstOrDefaultAsync();
         }
 
+        public async Task<int> CountStudentRowsAsync()
+        {
+            int q = await Database.Table<Student>().CountAsync();
+            return q;
+        }
+
+        public async Task<int> UpdateStudentAsync(Student student)
+        {            
+            return await Database.UpdateAsync(student);                 
+        }
+
         public async Task<int> SaveStudentAsync(Student student)
         {
             await Init();

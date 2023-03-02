@@ -12,13 +12,14 @@ using System.Globalization;
 using StudentsCourses.Services;
 using Command = MvvmHelpers.Commands.Command;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Maui.Behaviors;
 
 namespace StudentsCourses.ViewModels
 {
     class StudentsViewModel
     {
 
-        public IStudentsCoursesDataStore SqliteDataStore => DependencyService.Get<IStudentsCoursesDataStore>();
+        public   IStudentsCoursesDataStore SqliteDataStore => DependencyService.Get<IStudentsCoursesDataStore>();
 
         public ObservableRangeCollection<Student> StudentList { get; set; }
         public ObservableRangeCollection<Course> CourseList { get; set; }
@@ -35,8 +36,10 @@ namespace StudentsCourses.ViewModels
         public ICommand EditStudents { get; set; }
 
 
-        public ICommand EditStudents2 { get; set; }
-        
+        public ICommand SubmitStudentChanges { get; set; }
+
+        public ICommand SubmitStudentChangesPressed { get; set; }
+
         public StudentsViewModel()
         {
             PageAppearingCommand = new AsyncCommand(PageAppearing);
@@ -50,22 +53,87 @@ namespace StudentsCourses.ViewModels
             //EditStudents = new AsyncRelayCommand<StackLayout>(onEditStudents);
             EditStudents = new Command(onEditStudents);
 
-            SelectCommand = new AsyncRelayCommand<Student>(SelectAsync);
+
 
             //EditStudents2 = new AsyncRelayCommand<StackLayout stack>(onEditStudents2);
 
+            SubmitStudentChanges = new Command(onSubmitStudentChanges);
+
+            SubmitStudentChangesPressed = new Command(onSubmitStudentChangesPressed);
         }
-        private async Task SelectAsync(Student student)
+
+        private void onSubmitStudentChangesPressed(object obj)
         {
-
+            var b = 60 + 1;
         }
 
+        private async void onSubmitStudentChanges(object obj)
+        {
+            //find children
+            var grid = obj as Grid;
+            var stacklayout = grid.Children[0] as StackLayout;
+            var editbutton = grid.Children[1] as ImageButton;
+            var submitbutton = grid.Children[2] as ImageButton;
 
+            var entryStudentName = stacklayout.Children[1] as Entry;
+            var entryStudentSurname = stacklayout.Children[2] as Entry;
+            var entryStudentGPA = stacklayout.Children[3] as Entry;
 
-            private void onEditStudents(object obj)
-        {            
-            var b = 3 + 4;
-   
+            //disable access for editing
+            entryStudentName.IsReadOnly = true;
+            entryStudentSurname.IsReadOnly = true;
+            entryStudentGPA.IsReadOnly = true;
+
+            //hide submit button
+            submitbutton.IsVisible = false;
+
+            //show edit button 
+            editbutton.IsVisible = true;
+
+            //update DB
+            var students = StudentList;
+            foreach(var student in students)
+            {
+                try { 
+                var name = student.StudentName;
+                var surname = student.StudentSurname;
+                var gpa = student.StudentGPA;
+                if (String.IsNullOrEmpty(name)||String.IsNullOrWhiteSpace(name)) continue;
+                if (String.IsNullOrEmpty(surname)|| String.IsNullOrWhiteSpace(surname)) continue;
+                if (gpa > 4 || gpa < 0) continue;
+                await SqliteDataStore.UpdateStudentAsync(student);
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+            }            
+        }
+
+        
+
+        private void onEditStudents(object obj)
+        {
+            //find children
+            var grid = obj as Grid;
+            var stacklayout = grid.Children[0] as StackLayout;
+            var editbutton = grid.Children[1] as ImageButton;
+            var submitbutton = grid.Children[2] as ImageButton;
+
+            var entryStudentName = stacklayout.Children[1] as Entry;
+            var entryStudentSurname = stacklayout.Children[2] as Entry;
+            var entryStudentGPA = stacklayout.Children[3] as Entry;
+
+            //get access for editing
+            entryStudentName.IsReadOnly = false;
+            entryStudentSurname.IsReadOnly = false;
+            entryStudentGPA.IsReadOnly = false;
+
+            //hide edit button 
+            editbutton.IsVisible = false;
+
+            //show submit button
+            submitbutton.IsVisible = true;
         }
 
         private async void onDeleteStudentCommand(object obj) {
@@ -206,7 +274,7 @@ namespace StudentsCourses.ViewModels
                 if (String.IsNullOrEmpty(surname)) return;
                 if (String.IsNullOrEmpty(name)) return;
                 if (gpa > 4 || gpa < 0) return;
-                var student = new Student() { StudentName = name, StudentSurname = surname, StudentGPA = gpa };
+                var student = new Student() {  StudentName = name, StudentSurname = surname, StudentGPA = gpa };
                 StudentList.Add(student);
 
                 await SqliteDataStore.SaveStudentAsync(student);
