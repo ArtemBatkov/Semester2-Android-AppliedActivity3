@@ -7,6 +7,7 @@ using StudentsCourses.Models;
 
 using System;
 using System.IO;
+using StudentsCourses.ViewModels;
 
 namespace StudentsCourses;
 
@@ -37,7 +38,7 @@ public static class MauiProgram
 #endif
 
         // string dbPath = Repository.DBPATH; //related to SQLite
-        //builder.Services.AddSingleton<Repository>(s => ActivatorUtilities.CreateInstance<Repository>(s, dbPath));
+        builder.Services.AddSingleton<StudentsViewModel>();
 
 
         return builder.Build();

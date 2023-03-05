@@ -55,7 +55,10 @@
 	<ItemGroup>
 	  <None Remove="Platforms\Android\Resources\values\Delete-Bin-Trash-PNG-Clipart.png" />
 	  <None Remove="Platforms\Android\Resources\values\delete.png" />
+	  <None Remove="Resources\Images\delete.png" />
+	  <None Remove="Resources\Images\edit.png" />
 	  <None Remove="Resources\Images\edit.svg" />
+	  <None Remove="Resources\Images\save.png" />
 	</ItemGroup>
 
 	<ItemGroup>

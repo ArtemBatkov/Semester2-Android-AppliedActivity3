@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StudentsCourses.Services;
 using StudentsCourses.ViewModels;
+using System.Globalization;
 //using SQLite;  //related to SQLite
 
 
@@ -15,11 +16,13 @@ namespace StudentsCourses.Models
     // [Table("student")]  //related to SQLite
     public class Student
     {
-         
+
         
+
         private string _name;
         // [Column("_name"), MaxLength(100)] //related to SQLite
-        public string StudentName { get => _name; set => _name = value; }
+        public string StudentName { get => _name; 
+            set => _name = value; }
 
         private static readonly StudentsViewModel vm = new StudentsViewModel();
 
@@ -40,10 +43,15 @@ namespace StudentsCourses.Models
         public string StudentSurname { get => _surname; set => _surname = value; }
 
         private float _gpa;
-        public float StudentGPA { get => _gpa; set => _gpa = value; }
+        public float StudentGPA  { get => _gpa; set
+            {                 
+              float fvalue = 0;
+               if (float.TryParse(value.ToString(CultureInfo.InvariantCulture.NumberFormat), out fvalue))
+                    _gpa = fvalue;
+                else return;
+            }
+        }
 
-        public string getStudentName() => StudentName;
-        public string getStudentSurname() => StudentSurname;
-        public int getStudentId() => StudentId;
+ 
     }
 }

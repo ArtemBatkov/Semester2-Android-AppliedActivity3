@@ -1,6 +1,8 @@
 ﻿//using StudentsCourses.DataBase;  //related to SQLite
 
+
 using StudentsCourses.Services;
+using System.Globalization;
 
 namespace StudentsCourses;
 
@@ -16,7 +18,11 @@ public partial class App : Application
 
         MainPage = new AppShell();
 
-       // MyRepo = repo;//
+        // MyRepo = repo;//
+
+        CultureInfo customCulture = new CultureInfo("en-US");
+        Thread.CurrentThread.CurrentCulture = customCulture;
+        
 
     }
 }

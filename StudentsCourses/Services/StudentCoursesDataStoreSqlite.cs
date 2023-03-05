@@ -18,7 +18,7 @@ namespace StudentsCourses.Services
             SQLite.SQLiteOpenFlags.SharedCache;
 
         private static string DatabasePath => Path.Combine(FileSystem.AppDataDirectory, DatabaseFilename);
-
+        //my path C:\Users\artem\AppData\Local\Packages\8d8e4c5c-9c33-40dd-b5b0-b20b463dec24_9zz4h110yvjzm\LocalState\
         async Task Init()
         {
             if (Database is not null)
