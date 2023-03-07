@@ -15,19 +15,27 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Maui.Behaviors;
 using System.Collections.Specialized;
 
+
+
+  
+
+
+
 namespace StudentsCourses.ViewModels
 {
     class StudentsViewModel
     {
 
-        public   IStudentsCoursesDataStore SqliteDataStore => DependencyService.Get<IStudentsCoursesDataStore>();
+
+
+        public IStudentsCoursesDataStore SqliteDataStore => DependencyService.Get<IStudentsCoursesDataStore>();
 
         public ObservableRangeCollection<Student> StudentList { get; set; }
         public ObservableRangeCollection<Course> CourseList { get; set; }
 
         public AsyncCommand PageAppearingCommand { get; set; }
-        public ICommand SubmitStudent { get; set; }
-        public ICommand SubmitCourse { get; set; }
+        public ICommand SubmitStudent { get; set; } //+
+        public ICommand SubmitCourse { get; set; }//+
 
         public ICommand DeleteCoursesCommand { get; set; }
         public ICommand DeleteStudentsCommand { get; set; }
@@ -41,16 +49,28 @@ namespace StudentsCourses.ViewModels
 
         public ICommand SubmitStudentChangesPressed { get; set; }
 
-        public ICommand ShowStudentFillForm { get; set; }
+        public ICommand ShowStudentFillForm { get; set; }//+
         public ICommand CancelStudent { get; set; }
         public ICommand DeleteStudent { get; set; }
+
+
+        public ICommand ShowCourseFillForm { get; set; }//+
+        public ICommand CancelCourse { get; set; }//+
+
+        public ICommand SubmitCourseChanges { get; set; }//+
+
+        public ICommand EditCourse { get; set; }//+
+
+
+        public ICommand DeleteCourse { get; set; }//+
+
         public StudentsViewModel()
         {
             PageAppearingCommand = new AsyncCommand(PageAppearing);
             ShowStudentFillForm = new Command(onShowStudentFillForm);
             SubmitStudent = new Command(onStudentSubmitClicked);
             CancelStudent = new Command(onCancelStudentClicked);
-            SubmitCourse = new MvvmHelpers.Commands.Command(() => onCourseSubmitClicked());
+            SubmitCourse = new Command(onSubmitCourseClicked);
             StudentList = new ObservableRangeCollection<Student>();
             CourseList = new ObservableRangeCollection<Course>();
             DeleteCoursesCommand = new Command(onDeleteCourseCommand);
@@ -66,6 +86,17 @@ namespace StudentsCourses.ViewModels
             SubmitStudentChanges = new Command(onSubmitStudentChanges);
             DeleteStudent = new Command(onDeleteStudent);
 
+            ShowCourseFillForm = new Command(onShowCourseFillForm);
+
+            CancelCourse = new Command(onCancelCourseClicked);
+
+            SubmitCourseChanges = new Command(onSubmitCourseChanges);
+
+            EditCourse = new Command(onEditCourse);
+
+            DeleteCourse = new Command(onDeleteCourse);
+
+
 
         }
 
@@ -76,7 +107,7 @@ namespace StudentsCourses.ViewModels
             var mainGrid = obj as Grid;
             //var studentFillOutForm = mainGrid.Children[1] as Grid;
             var studentScrollView = mainGrid.Children[0] as ScrollView;
-            var studentStackLayout = studentScrollView.Children[0] as StackLayout; 
+            var studentStackLayout = studentScrollView.Children[0] as StackLayout;
             var studentFillOutForm = studentStackLayout.Children[1] as Grid;
             // If it is not visible do it visible
             if (!studentFillOutForm.IsVisible)
@@ -96,7 +127,7 @@ namespace StudentsCourses.ViewModels
         private void onCancelStudentClicked(object obj)
         {
             //Find the form
-            var filloutForm = (obj as Grid);          
+            var filloutForm = (obj as Grid);
             if (filloutForm.IsVisible)
                 filloutForm.IsVisible = false;
         }
@@ -158,7 +189,7 @@ namespace StudentsCourses.ViewModels
             }
         }
 
-        //------------------FILL-STUDENT-FORM-START------------------//
+        //------------------FILL-STUDENT-FORM-END---------------------//
 
         //-------------STUDENT-CARD-MANIPULATIONS-START--------------//
         private void onEditStudent(object obj)
@@ -232,7 +263,7 @@ namespace StudentsCourses.ViewModels
             var SubmitIB = gridImageButtons.Children[0] as ImageButton;
             var EditIB = gridImageButtons.Children[1] as ImageButton;
             var DeleteIB = gridImageButtons.Children[2] as ImageButton;
-           
+
             //update DB
             var student = StudentList.FirstOrDefault(s => s.StudentId == Convert.ToInt32(_entryStudentId.Text));
             try
@@ -250,7 +281,7 @@ namespace StudentsCourses.ViewModels
                 {
                     labelStudentSurnameError.IsVisible = true;
                     return;
-                }else labelStudentSurnameError.IsVisible=false;
+                } else labelStudentSurnameError.IsVisible = false;
 
                 if (student.StudentGPA > 4 || student.StudentGPA < 0)
                 {
@@ -320,16 +351,16 @@ namespace StudentsCourses.ViewModels
                 var parentBorder = grid.Parent as Border;
                 var parentCollectionView = parentBorder.Parent as CollectionView;
                 var parentMainStackLayout = parentCollectionView.Parent as StackLayout;
-                
+
                 //var parentMainScrollView = parentMainStackLayout.Parent as IView;
                 //parentMainScrollView.InvalidateMeasure();
                 parentCollectionView.RemoveLogicalChild(parentBorder);
                 //parentCollectionView.ItemsSource.
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                 await Refresh(); //the exception occures on Windows:
+                await Refresh(); //the exception occures on Windows:
                 //when a user tries to delete a card that HAS ALREADY DELETED
                 return;
             }
@@ -348,6 +379,325 @@ namespace StudentsCourses.ViewModels
 
 
         //-------------STUDENT-CARD-MANIPULATIONS-END--------------//
+
+
+
+        //********************COURSES*SECTION*********************//
+
+        //---------------FILL-COURSE-FORM-START-------------------//       
+        private void onShowCourseFillForm(object obj)
+        {
+            //Find the form
+            var mainGrid = obj as Grid;
+            var courseScrollView = mainGrid.Children[1] as ScrollView;
+            var courseStackLayout = courseScrollView.Children[0] as StackLayout;
+            var courseFillOutForm = courseStackLayout.Children[1] as Grid;
+            // If it is not visible do it visible
+            if (!courseFillOutForm.IsVisible)
+            {
+                courseFillOutForm.IsVisible = true;
+                //Clear all text of the card 
+                var courseEntriesStackFillOutForm = courseFillOutForm.Children[0] as StackLayout;
+                (courseEntriesStackFillOutForm.Children[0] as Label).IsVisible = false;
+                (courseEntriesStackFillOutForm.Children[1] as Entry).Text = "";
+                (courseEntriesStackFillOutForm.Children[2] as Label).IsVisible = false;
+                (courseEntriesStackFillOutForm.Children[3] as Entry).Text = "";
+                (courseEntriesStackFillOutForm.Children[4] as Label).IsVisible = false;
+                (courseEntriesStackFillOutForm.Children[5] as Entry).Text = "";
+            }
+        }
+
+
+
+        private async void onSubmitCourseClicked(object obj)
+        {
+            //input is the intial form as Grid
+            try
+            {
+                //ParseObjects
+                var gridCourseFillOutForm = obj as Grid;
+                var stackCourseEntries = gridCourseFillOutForm.Children[0] as StackLayout;
+                var LabelCourseNameError = stackCourseEntries.Children[0] as Label;
+                var LabelLengthError = stackCourseEntries.Children[2] as Label;
+                var LabelCostError = stackCourseEntries.Children[4] as Label;
+
+                //Course name checking
+                if (String.IsNullOrEmpty(_pageCourseName)) { LabelCourseNameError.IsVisible = true; return; }//_pageStudent could be null
+                else LabelCourseNameError.IsVisible = false;
+
+                string name = _pageCourseName.Trim();
+                if (String.IsNullOrEmpty(name)) { LabelCourseNameError.IsVisible = true; return; }
+                else LabelCourseNameError.IsVisible = false;
+
+                //Length checking
+                if (String.IsNullOrEmpty(_pageCourseLength)) { LabelLengthError.IsVisible = true; return; }
+                else LabelLengthError.IsVisible = false;
+                //try to parse
+                int length;
+                if (int.TryParse(_pageCourseLength, out length))
+                {//parsing successful
+                    if (length < 0) { LabelLengthError.IsVisible = true; return; }
+                    else LabelLengthError.IsVisible = false;
+                }
+                else
+                {
+                    LabelLengthError.IsVisible = true;
+                    return;
+                }
+
+                //cost checking
+                if (String.IsNullOrEmpty(_pageCourseCost)) { LabelCostError.IsVisible = true; return; }
+                else LabelCostError.IsVisible = false;
+                //try to parse
+                double cost;
+                if (double.TryParse(_pageCourseCost, CultureInfo.InvariantCulture.NumberFormat, out cost))
+                {
+                    if (cost < 0) { LabelCostError.IsVisible = true; return; }
+                    else { LabelCostError.IsVisible = false; }
+                }
+                else
+                {
+                    LabelCostError.IsVisible = true;
+                    return;
+                }
+
+                //Hide the card
+                if (gridCourseFillOutForm.IsVisible)
+                    gridCourseFillOutForm.IsVisible = false;
+
+                // Add a new course to a list and DB
+                var course = new Course() { CourseName = name, CourseLength = length, CourseCost = cost };
+                await SqliteDataStore.SaveCourseAsync(course);
+                CourseList.Insert(0, course); // new feature
+            }
+            catch (Exception ex)
+            {
+                //ParseObjects
+                var gridCourseFillOutForm = obj as Grid;
+                var stackCourseEntries = gridCourseFillOutForm.Children[0] as StackLayout;
+                var LabelCourseNameError = stackCourseEntries.Children[0] as Label;
+                var LabelLengthError = stackCourseEntries.Children[2] as Label;
+                var LabelCostError = stackCourseEntries.Children[4] as Label;
+                LabelCourseNameError.IsVisible = true; LabelLengthError.IsVisible = true; LabelCostError.IsVisible = true;
+                return;
+            }
+        }
+
+
+        private void onCancelCourseClicked(object obj)
+        {
+            //Find the form
+            var filloutForm = (obj as Grid);
+            if (filloutForm.IsVisible)
+                filloutForm.IsVisible = false;
+        }
+
+        //----------------FILL-COURSE-FORM-END-------------------//
+
+
+
+
+        //-------------COURSE-CARD-MANIPULATIONS-START------------//
+        private async void onSubmitCourseChanges(object obj)
+        {
+            //find children
+            var grid = obj as Grid;
+            var stacklayoutEntries = grid.Children[0] as StackLayout;
+            var gridImageButtons = grid.Children[1] as Grid;
+
+            //children 1 - StackLayout
+            //StackLayout children
+            //entries
+            var entryCourseName = stacklayoutEntries.Children[1] as Entry;
+            var entryCourseLength = stacklayoutEntries.Children[3] as Entry;
+            var entryCourseCost = stacklayoutEntries.Children[5] as Entry;
+            var _entryCourseId = stacklayoutEntries.Children[6] as Entry;
+
+            //labels
+            var labelCourseNameError = stacklayoutEntries.Children[0] as Label;
+            var labelCourseLengthError = stacklayoutEntries.Children[2] as Label;
+            var labelCourseCostError = stacklayoutEntries.Children[4] as Label;
+
+            //children 2  - Grid
+            //Grid children
+            //ImageButtons 
+            var SubmitIB = gridImageButtons.Children[0] as ImageButton;
+            var EditIB = gridImageButtons.Children[1] as ImageButton;
+            var DeleteIB = gridImageButtons.Children[2] as ImageButton;
+
+            //update DB
+            var course = CourseList.FirstOrDefault(s => s.CourseId == Convert.ToInt32(_entryCourseId.Text));
+            try
+            {
+                //naming checking 
+                course.CourseName = course.CourseName.Trim();                
+                if (String.IsNullOrEmpty(course.CourseName))
+                {
+                    labelCourseNameError.IsVisible = true;
+                    return;
+                }
+                else labelCourseNameError.IsVisible = false;
+
+                //length checking
+                if(course.CourseLength < 0)
+                {
+                    labelCourseLengthError.IsVisible = true;
+                    return;
+                }
+                else
+                    labelCourseLengthError.IsVisible = false;
+
+                //cost checking
+                if (course.CourseCost < 0) 
+                {
+                    labelCourseCostError.IsVisible = true;
+                    return;
+                }
+                else labelCourseCostError.IsVisible = false;
+
+                entryCourseCost.Text = course.CourseCost.ToString();
+                entryCourseLength.Text = course.CourseLength.ToString();
+                await SqliteDataStore.UpdateCourseAsync(course);
+            }
+            catch (Exception ex)
+            {
+                labelCourseNameError.IsVisible = true;
+                labelCourseLengthError.IsVisible = true;
+                labelCourseCostError.IsVisible = true;
+                return;
+            }
+            //disable access for editing
+            entryCourseCost.IsEnabled = false;
+            entryCourseLength.IsEnabled = false;
+            entryCourseName.IsEnabled = false;
+            //hide submit and delete buttons
+            SubmitIB.IsVisible = false;
+            DeleteIB.IsVisible = false;
+
+            //show edit button 
+            EditIB.IsVisible = true;
+        }
+
+
+        private void onEditCourse(object obj)
+        {
+            //find children
+            var grid = obj as Grid;
+            var stacklayoutEntries = grid.Children[0] as StackLayout;
+            var gridImageButtons = grid.Children[1] as Grid;
+
+            //children 1 - StackLayout
+            //StackLayout children
+            //entries
+            var entryCourseName = stacklayoutEntries.Children[1] as Entry;
+            var entryCourseLength = stacklayoutEntries.Children[3] as Entry;
+            var entryCourseCost = stacklayoutEntries.Children[5] as Entry;
+
+            //labels
+            var labelCourseNameError = stacklayoutEntries.Children[0] as Label;
+            var labelCourseLengthError = stacklayoutEntries.Children[2] as Label;
+            var labelCourseCostError = stacklayoutEntries.Children[4] as Label;
+
+            //get access for editing
+            entryCourseName.IsEnabled = true;
+            entryCourseLength.IsEnabled = true;
+            entryCourseCost.IsEnabled = true;
+
+            //hide labels
+            labelCourseNameError.IsVisible = false;
+            labelCourseLengthError.IsVisible = false;
+            labelCourseCostError.IsVisible = false;
+
+            //children 2  - Grid
+            //Grid children
+            //ImageButtons 
+            var SubmitIB = gridImageButtons.Children[0] as ImageButton;
+            var EditIB = gridImageButtons.Children[1] as ImageButton;
+            var DeleteIB = gridImageButtons.Children[2] as ImageButton;
+
+            //hide edit button 
+            EditIB.IsVisible = false;
+
+            //show submit and delete button
+            SubmitIB.IsVisible = true;
+            DeleteIB.IsVisible = true;
+
+        }
+
+        private async void onDeleteCourse(object obj)
+        {
+            //find children
+            var grid = obj as Grid;
+            var stacklayoutEntries = grid.Children[0] as StackLayout;
+            var gridImageButtons = grid.Children[1] as Grid;
+
+            //children 1 - StackLayout
+            //StackLayout children
+            //entries
+            var entryCourseName = stacklayoutEntries.Children[1] as Entry;
+            var entryCourseLength = stacklayoutEntries.Children[3] as Entry;
+            var entryCourseCost = stacklayoutEntries.Children[5] as Entry;
+            var _entryCourseId = stacklayoutEntries.Children[6] as Entry;
+
+            //labels
+            var labelCourseNameError = stacklayoutEntries.Children[0] as Label;
+            var labelCourseLengthError = stacklayoutEntries.Children[2] as Label;
+            var labelCourseCostError = stacklayoutEntries.Children[4] as Label;
+
+            //children 2  - Grid
+            //Grid children
+            //ImageButtons 
+            var SubmitIB = gridImageButtons.Children[0] as ImageButton;
+            var EditIB = gridImageButtons.Children[1] as ImageButton;
+            var DeleteIB = gridImageButtons.Children[2] as ImageButton;
+
+            //delete DB
+            var course = CourseList.FirstOrDefault(s => s.CourseId == Convert.ToInt32(_entryCourseId.Text));
+            try
+            {
+                await SqliteDataStore.DeleteCourseAsync(course);
+                CourseList.Remove(course);
+                var parentBorder = grid.Parent as Border;
+                if(parentBorder == null) {
+                    var b = 4 + 4;
+                }
+                var parentCollectionView = parentBorder.Parent as CollectionView;
+                if (parentCollectionView == null)
+                {
+                    var c = 3 + 3;
+                }
+
+                //parentCollectionView.RemoveLogicalChild(parentBorder);
+               
+                //CollectionViewSource.GetDefaultView(CourseList).Refresh();
+
+                //var parentMainStackLayout = parentCollectionView.Parent as StackLayout;
+                //parentCollectionView.RemoveLogicalChild(parentBorder);
+            }
+            catch (Exception ex)
+            {
+                await Refresh();
+                return;
+            }
+            //disable access for editing
+            entryCourseCost.IsEnabled = false;
+            entryCourseLength.IsEnabled = false;
+            entryCourseName.IsEnabled = false;
+            //hide submit and delete buttons
+            SubmitIB.IsVisible = false;
+            DeleteIB.IsVisible = false;
+
+            //show edit button 
+            EditIB.IsVisible = true;
+        }
+
+        //-------------COURSE-CARD-MANIPULATIONS-END------------//
+
+
+
+
+
+
 
 
 

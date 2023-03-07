@@ -52,6 +52,11 @@ namespace StudentsCourses.Services
             return await Database.UpdateAsync(student);                 
         }
 
+        public async Task<int> UpdateCourseAsync(Course course)
+        {
+            return await Database.UpdateAsync(course);
+        }
+
         public async Task<int> SaveStudentAsync(Student student)
         {
             await Init();

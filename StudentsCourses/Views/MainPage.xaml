@@ -62,6 +62,7 @@
                     </StackLayout>
                     
                     <!-- Save a new record or delete it : buttons-->
+                    
                     <StackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" Padding="10" Spacing="10">
                   
                         <ImageButton x:Name="submit"   Grid.Row="0" Grid.Column="1"    
@@ -217,30 +218,68 @@
 
         <ScrollView Grid.Column="1" Grid.Row="0">
             <StackLayout Spacing="30">
-                <Entry Placeholder="Insert the course name"  
-                       Text="{Binding EntryCourseName}"
-                       Keyboard="Text"/>
+                <Button Text="Add a new course" TextColor="White" BackgroundColor="Blue"
+                        Command="{Binding ShowCourseFillForm}"
+                        CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"/>
+
+                <!-- A blank of pop up card - start -->
+                <Grid  x:Name="cardfillcourse" ColumnDefinitions="3*,1*" BackgroundColor="{StaticResource cardbg}" IsVisible="false" Margin="10">
+                    <!-- 3 Entries of the default card -->
+                    <StackLayout Grid.Row="0" Grid.Column="0" Padding="10">
+                        <Label Text="A name for a course can't be empty or a whitespace" TextColor="White" Background="Red" IsVisible="false"/>
+                        <Entry Placeholder="Insert a course name"  Text="{Binding EntryCourseName}" TextColor="Black" />
+                        <Label Text="A length of a course can't be empty, negative or fractional value" TextColor="White" Background="Red" IsVisible="false"/>
+                        <Entry Placeholder="Insert a length of a course" Text="{Binding EntryCourseLength}" TextColor="Black" Keyboard="Telephone"/>
+                        <Label Text="Cost can't be negative or empty" TextColor="White" Background="Red" IsVisible="false"/>
+                        <Entry Placeholder="Insert the course cost" Text="{Binding EntryCourseCost}" TextColor="Black" Keyboard="Numeric"/>
+                    </StackLayout>
+
+                    <!-- Save a new record or delete it : buttons-->
+
+                    <StackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" Padding="10" Spacing="10">
+
+                        <ImageButton x:Name="submitcourse"   Grid.Row="0" Grid.Column="1"    
+                                     BackgroundColor="{Binding BackgroundColor,Source={x:Reference cardfillcourse}}"
+                                     Source="save.png"
+                                     HeightRequest="50"
+                                     WidthRequest="50"
+                                     Aspect="AspectFit"
+                                     Padding="10"
+                                     Command="{Binding SubmitCourse}"
+                                     CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"/>
+
+                        <ImageButton x:Name="deletecourse"   Grid.Row="0" Grid.Column="1"
+                                     BackgroundColor="{Binding BackgroundColor,Source={x:Reference cardfillcourse}}"
+                                     Source="delete.png"
+                                     HeightRequest="50"
+                                     WidthRequest="50"
+                                     Aspect="AspectFit"
+                                     Padding="10"
+                                     Command="{Binding CancelCourse}"
+                                     CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"/>
+                    </StackLayout>
+                </Grid>
+                <!-- A blank of pop up card - end -->
                 
-                <Entry Placeholder="Insert the course length" 
-                       Text="{Binding EntryCourseLength}"
-                       Keyboard="Telephone"/>
                 
-                <Entry Placeholder="Insert the course cost" 
-                       Text="{Binding EntryCourseCost}"
-                       Keyboard="Numeric"/>
-                
-                <Button Text="Submit" Command="{Binding SubmitCourse}"/>
+              
 
                 <CollectionView 
                        x:Name="CVCourses"
-                       BackgroundColor="{StaticResource cardbg}"
+                       Margin="10,0,10,0"
                        ItemsSource="{Binding CourseList}" 
                        Header="Scroll right to delete">
 
+                    <!-- COllectionView - Spacing-->
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical"
+                            ItemSpacing="10"/>
+                    </CollectionView.ItemsLayout>
+
                     <CollectionView.ItemTemplate >
                         <DataTemplate>
-
-                            <SwipeView Threshold="200">
+                            <!-- SWIPE WORKS ONLY ON ANDROID-->
+                           <!-- <SwipeView Threshold="200">
                                 <SwipeView.RightItems>
                                     <SwipeItems>
                                         <SwipeItem 
@@ -252,18 +291,99 @@
                                     </SwipeItems>
                                     
                                 </SwipeView.RightItems>
-
-                                <StackLayout>
-                                    <Label Text="{Binding CourseId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
-                                    <Label Text="{Binding CourseName, StringFormat='Course name = {0}'}" TextColor="{StaticResource cardtextbg}"/>
-                                    <Label Text="{Binding CourseLength,StringFormat='{0:D0} semesters'}" TextColor="{StaticResource cardtextbg}"/>
-                                    <Label Text="{Binding CourseCost,StringFormat='${0:F2}'}" TextColor="{StaticResource cardtextbg}"
-                                               Margin="0,0,0,10"/>
-                                </StackLayout>
-
-
-                            </SwipeView>
+                            </SwipeView> -->
+                            <!-- SWIPE WORKS ONLY ON ANDROID-->
                             
+                            
+                            <!-- Card Course Border - start -->
+                            <Border x:Name ="bordercardcourse" StrokeShape="RoundRectangle 10 10 10 10" BackgroundColor="{StaticResource cardbg}">
+                                <Grid ColumnDefinitions="3*,1*"  RowSpacing="10">
+                                    <!--StackLayout of Entries - start-->
+                                    <StackLayout Grid.Row="0" Grid.Column="0" x:Name="CourseStack" 
+                                                 Margin="20">
+                                        <Label Text="A name for a course can't be empty or a whitespace" TextColor="White" Background="Red" IsVisible="false"/>
+                                        <Entry Placeholder="Insert a course name"  Text="{Binding CourseName}"  TextColor="Black" IsEnabled="False"/>
+                                        <Label Text="A length of a course can't be empty, negative or fractional value" TextColor="White" Background="Red" IsVisible="false" />
+                                        <Entry Placeholder="Insert a length of a course" Text="{Binding CourseLength}" TextColor="Black" Keyboard="Telephone" IsEnabled="False"/>
+                                        <Label Text="Cost can't be negative or empty" TextColor="White" Background="Red" IsVisible="false"/>
+                                        <Entry Placeholder="Insert the course cost" Text="{Binding CourseCost}" TextColor="Black" Keyboard="Numeric" IsEnabled="False"/>
+                                        <Entry Text="{Binding CourseId}" IsVisible="true" IsEnabled="False" TextColor="DarkMagenta"/>
+                                    </StackLayout>
+                                    <!--StackLayout of Entries - end-->
+
+                                    <Grid Grid.Row="0" Grid.Column="1" RowSpacing="10" RowDefinitions="1*,1*,1*" VerticalOptions="Center">
+                                        <!-- ImageButton Submit - start -->
+                                        <ImageButton x:Name="submitcourse"   Grid.Row="0" Grid.Column="0"  
+                                                         BackgroundColor="{Binding BackgroundColor,Source={x:Reference bordercardcourse}}"
+                                                         HeightRequest="50"
+                                                         WidthRequest="50"    
+                                                         Aspect="AspectFit"
+                                                         Padding="10"
+                                                         Source="save.png"
+                                                         IsVisible="false"                                                  
+                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=SubmitCourseChanges}"
+                                                         CommandParameter="{Binding Source={RelativeSource Mode=FindAncestor, AncestorLevel=2, AncestorType={x:Type Grid}}}">
+                                        </ImageButton>
+                                        <!-- ImageButton Submit - end -->
+
+                                        <!--ImageButton Edit - start -->
+                                        <ImageButton x:Name="editcourse" Grid.Row="1" Grid.Column="0"                                            
+                                                         Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=EditCourse}"
+                                                         CommandParameter="{Binding Source={RelativeSource Mode=FindAncestor, AncestorLevel=2, AncestorType={x:Type Grid}}}" 
+                                                         Source="edit.png"
+                                                         BackgroundColor="{Binding BackgroundColor,Source={x:Reference bordercardcourse}}"
+                                                         HeightRequest="50"
+                                                         WidthRequest="50"
+                                                         Aspect="AspectFit"
+                                                         Padding="10">
+                                            <VisualStateManager.VisualStateGroups>
+                                                <VisualStateGroupList>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Normal">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="Opacity" Value="1"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Pressed">
+                                                            <VisualState.Setters>
+                                                                <Setter Property="Opacity" Value="0.5"/>
+                                                            </VisualState.Setters>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateGroupList>
+                                            </VisualStateManager.VisualStateGroups>
+                                        </ImageButton>
+                                        <!--ImageButton Edit - end -->
+
+                                        <!-- ImageButton Delete - start -->
+                                        <ImageButton x:Name="deletecourse"   Grid.Row="2" Grid.Column="0"
+                                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:StudentsViewModel}}, Path=DeleteCourse}"
+                                                         CommandParameter="{Binding Source={RelativeSource Mode=FindAncestor, AncestorLevel=2, AncestorType={x:Type Grid}}}" 
+                                                         BackgroundColor="{Binding BackgroundColor,Source={x:Reference bordercardcourse}}"
+                                                         HeightRequest="50"
+                                                         WidthRequest="50"
+                                                         Aspect="AspectFit"
+                                                         Padding="10"       
+                                                         IsVisible="false"
+                                                         Source="delete.png">
+                                        </ImageButton>
+                                        <!-- ImageButton Delete - end -->
+
+                                    </Grid>
+
+                                </Grid>
+                            </Border>
+                            <!-- Card Course Border - end -->
+
+                            <!--
+                            <StackLayout>
+                                <Label Text="{Binding CourseId, StringFormat='Id={0:D0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseName, StringFormat='Course name = {0}'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseLength,StringFormat='{0:D0} semesters'}" TextColor="{StaticResource cardtextbg}"/>
+                                <Label Text="{Binding CourseCost,StringFormat='${0:F2}'}" TextColor="{StaticResource cardtextbg}"
+                                               Margin="0,0,0,10"/>
+                            </StackLayout>
+                            -->
 
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
