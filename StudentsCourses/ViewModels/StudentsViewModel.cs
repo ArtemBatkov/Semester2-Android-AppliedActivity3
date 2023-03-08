@@ -1,29 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MvvmHelpers;
 using MvvmHelpers.Commands;
-using MvvmHelpers;
-using System.Windows.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using StudentsCourses.Models;
-using System.Globalization;
 using StudentsCourses.Services;
+using System.Globalization;
+using System.Windows.Input;
 using Command = MvvmHelpers.Commands.Command;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Maui.Behaviors;
-using System.Collections.Specialized;
 
 
 
-  
+
 
 
 
 namespace StudentsCourses.ViewModels
 {
-    class StudentsViewModel
+    class StudentsViewModel: ObservableObject
     {
 
 
@@ -32,6 +23,10 @@ namespace StudentsCourses.ViewModels
 
         public ObservableRangeCollection<Student> StudentList { get; set; }
         public ObservableRangeCollection<Course> CourseList { get; set; }
+
+        public ObservableRangeCollection<string> AvailableCourses { get;set;}
+            
+ 
 
         public AsyncCommand PageAppearingCommand { get; set; }
         public ICommand SubmitStudent { get; set; } //+
@@ -63,6 +58,19 @@ namespace StudentsCourses.ViewModels
 
 
         public ICommand DeleteCourse { get; set; }//+
+
+
+        public ImageSource Photo { get => _photo;
+            set 
+            {
+                _photo = value;
+                OnPropertyChanged(nameof(Photo));
+            }
+        }
+        private ImageSource _photo { get; set; } 
+
+        public ICommand CapturePhoto { get; set; }
+       
 
         public StudentsViewModel()
         {
@@ -97,7 +105,9 @@ namespace StudentsCourses.ViewModels
             DeleteCourse = new Command(onDeleteCourse);
 
 
+            CapturePhoto = new Command(onCapturePhoto);
 
+            AvailableCourses = new ObservableRangeCollection<string>();           
         }
 
         //------------------FILL-STUDENT-FORM-START------------------//
@@ -121,6 +131,10 @@ namespace StudentsCourses.ViewModels
                 (studentEntriesStackFillOutForm.Children[3] as Entry).Text = "";
                 (studentEntriesStackFillOutForm.Children[4] as Label).IsVisible = false;
                 (studentEntriesStackFillOutForm.Children[5] as Entry).Text = "";
+                var picker = (studentEntriesStackFillOutForm.Children[6] as Picker);
+                picker.SelectedItem = NO_COURSES ;
+
+
             }
         }
 
@@ -171,7 +185,12 @@ namespace StudentsCourses.ViewModels
                     gridStudentFillOutForm.IsVisible = false;
 
                 // Add a new student to a list and DB
-                var student = new Student() { StudentName = name, StudentSurname = surname, StudentGPA = gpa };
+                var student = new Student() {
+                    StudentName = name,
+                    StudentSurname = surname,
+                    StudentGPA = gpa,
+                    Course = (_pageStudentCourseSelected != NO_COURSES) ? _pageStudentCourseSelected : null
+                    };
                 await SqliteDataStore.SaveStudentAsync(student);
                 //StudentList.Add(student);
                 StudentList.Insert(0, student); // new feature
@@ -189,10 +208,24 @@ namespace StudentsCourses.ViewModels
             }
         }
 
+        //Capturing photoes
+        private async void onCapturePhoto()
+        {
+            FileResult photo = await MediaPicker.PickPhotoAsync();
+            Stream stream = await photo.OpenReadAsync();
+
+            MemoryStream memory = new MemoryStream();
+            stream.CopyTo(memory);
+
+            Photo = ImageSource.FromStream(() => new MemoryStream(memory.ToArray()));
+        }
+
+
+
         //------------------FILL-STUDENT-FORM-END---------------------//
 
         //-------------STUDENT-CARD-MANIPULATIONS-START--------------//
-        private void onEditStudent(object obj)
+        private async void onEditStudent(object obj)
         {
             //find children
             var grid = obj as Grid;
@@ -205,6 +238,7 @@ namespace StudentsCourses.ViewModels
             var entryStudentName = stacklayoutEntries.Children[1] as Entry;
             var entryStudentSurname = stacklayoutEntries.Children[3] as Entry;
             var entryStudentGPA = stacklayoutEntries.Children[5] as Entry;
+            var _entryStudentId = stacklayoutEntries.Children[6] as Entry;
 
             //labels
             var labelStudentNameError = stacklayoutEntries.Children[0] as Label;
@@ -221,12 +255,17 @@ namespace StudentsCourses.ViewModels
             labelStudentSurnameError.IsVisible = false;
             labelStudentGPAError.IsVisible = false;
 
+         
+
             //children 2  - Grid
             //Grid children
             //ImageButtons 
             var SubmitIB = gridImageButtons.Children[0] as ImageButton;
             var EditIB = gridImageButtons.Children[1] as ImageButton;
             var DeleteIB = gridImageButtons.Children[2] as ImageButton;
+
+            var picker = gridImageButtons.Children[3] as Picker;
+            picker.IsVisible = true;
 
             //hide edit button 
             EditIB.IsVisible = false;
@@ -235,6 +274,24 @@ namespace StudentsCourses.ViewModels
             SubmitIB.IsVisible = true;
             DeleteIB.IsVisible = true;
 
+            picker.ItemsSource = AvailableCourses;
+
+            //student
+            var student = StudentList.FirstOrDefault(s => s.StudentId == Convert.ToInt32(_entryStudentId.Text));
+            if(student.Course == null || (!AvailableCourses.Contains(student.Course)) )
+            {
+                picker.SelectedItem = NO_COURSES;
+                try
+                {
+                    student.Course = null;
+                    await SqliteDataStore.UpdateStudentAsync(student);
+                }
+                catch (Exception ex) { await Refresh(); return; }
+            }
+            else
+            {
+                picker.SelectedItem = AvailableCourses.FirstOrDefault(s => s == student.Course);
+            }
         }
 
         private async void onSubmitStudentChanges(object obj)
@@ -263,6 +320,10 @@ namespace StudentsCourses.ViewModels
             var SubmitIB = gridImageButtons.Children[0] as ImageButton;
             var EditIB = gridImageButtons.Children[1] as ImageButton;
             var DeleteIB = gridImageButtons.Children[2] as ImageButton;
+            var picker = gridImageButtons.Children[3] as Picker;
+            
+
+            var course = picker.SelectedItem as string;
 
             //update DB
             var student = StudentList.FirstOrDefault(s => s.StudentId == Convert.ToInt32(_entryStudentId.Text));
@@ -281,7 +342,8 @@ namespace StudentsCourses.ViewModels
                 {
                     labelStudentSurnameError.IsVisible = true;
                     return;
-                } else labelStudentSurnameError.IsVisible = false;
+                }
+                else labelStudentSurnameError.IsVisible = false;
 
                 if (student.StudentGPA > 4 || student.StudentGPA < 0)
                 {
@@ -290,6 +352,11 @@ namespace StudentsCourses.ViewModels
                 }
                 else labelStudentGPAError.IsVisible = false;
                 entryStudentGPA.Text = student.StudentGPA.ToString();
+
+
+                student.Course = (course == NO_COURSES) ? null:course;
+                OnPropertyChanged();
+
                 await SqliteDataStore.UpdateStudentAsync(student);
             }
             catch (Exception ex)
@@ -309,6 +376,8 @@ namespace StudentsCourses.ViewModels
 
             //show edit button 
             EditIB.IsVisible = true;
+
+            picker.IsVisible = false;
         }
 
         private async void onDeleteStudent(object obj)
@@ -338,6 +407,8 @@ namespace StudentsCourses.ViewModels
             var EditIB = gridImageButtons.Children[1] as ImageButton;
             var DeleteIB = gridImageButtons.Children[2] as ImageButton;
 
+            var picker = gridImageButtons.Children[3] as Picker;
+
             //delete from DB
             var student = StudentList.FirstOrDefault(s => s.StudentId == Convert.ToInt32(_entryStudentId.Text));
             try
@@ -354,9 +425,11 @@ namespace StudentsCourses.ViewModels
 
                 //var parentMainScrollView = parentMainStackLayout.Parent as IView;
                 //parentMainScrollView.InvalidateMeasure();
-                parentCollectionView.RemoveLogicalChild(parentBorder);
+                //parentCollectionView.RemoveLogicalChild(parentBorder);
                 //parentCollectionView.ItemsSource.
 
+                
+                await Refresh(); //the exception occures on Windows:
             }
             catch (Exception ex)
             {
@@ -374,6 +447,8 @@ namespace StudentsCourses.ViewModels
 
             //show edit button 
             EditIB.IsVisible = true;
+
+            picker.IsVisible = false;
         }
 
 
@@ -469,6 +544,7 @@ namespace StudentsCourses.ViewModels
                 var course = new Course() { CourseName = name, CourseLength = length, CourseCost = cost };
                 await SqliteDataStore.SaveCourseAsync(course);
                 CourseList.Insert(0, course); // new feature
+                AvailableCourses.Add(course.CourseName);
             }
             catch (Exception ex)
             {
@@ -530,7 +606,7 @@ namespace StudentsCourses.ViewModels
             try
             {
                 //naming checking 
-                course.CourseName = course.CourseName.Trim();                
+                course.CourseName = course.CourseName.Trim();
                 if (String.IsNullOrEmpty(course.CourseName))
                 {
                     labelCourseNameError.IsVisible = true;
@@ -539,7 +615,7 @@ namespace StudentsCourses.ViewModels
                 else labelCourseNameError.IsVisible = false;
 
                 //length checking
-                if(course.CourseLength < 0)
+                if (course.CourseLength < 0)
                 {
                     labelCourseLengthError.IsVisible = true;
                     return;
@@ -548,7 +624,7 @@ namespace StudentsCourses.ViewModels
                     labelCourseLengthError.IsVisible = false;
 
                 //cost checking
-                if (course.CourseCost < 0) 
+                if (course.CourseCost < 0)
                 {
                     labelCourseCostError.IsVisible = true;
                     return;
@@ -624,6 +700,7 @@ namespace StudentsCourses.ViewModels
 
         }
 
+
         private async void onDeleteCourse(object obj)
         {
             //find children
@@ -657,22 +734,28 @@ namespace StudentsCourses.ViewModels
             {
                 await SqliteDataStore.DeleteCourseAsync(course);
                 CourseList.Remove(course);
-                var parentBorder = grid.Parent as Border;
-                if(parentBorder == null) {
-                    var b = 4 + 4;
-                }
-                var parentCollectionView = parentBorder.Parent as CollectionView;
-                if (parentCollectionView == null)
-                {
-                    var c = 3 + 3;
-                }
+                OnPropertyChanged(nameof(CourseList));
+
+
+                //var parentBorder = grid.Parent as Border;
+                //if (parentBorder == null)
+                //{
+                //    var b = 4 + 4;
+                //}
+                //var parentCollectionView = parentBorder.Parent as CollectionView;
+                //if (parentCollectionView == null)
+                //{
+                //    var c = 3 + 3;
+                //}
 
                 //parentCollectionView.RemoveLogicalChild(parentBorder);
-               
+
                 //CollectionViewSource.GetDefaultView(CourseList).Refresh();
 
                 //var parentMainStackLayout = parentCollectionView.Parent as StackLayout;
                 //parentCollectionView.RemoveLogicalChild(parentBorder);
+                AvailableCourses.Remove(course.CourseName);
+                await Refresh();
             }
             catch (Exception ex)
             {
@@ -696,17 +779,8 @@ namespace StudentsCourses.ViewModels
 
 
 
-
-
-
-
-
-
-
-
-
-
-        private async void onDeleteStudentCommand(object obj) {
+        private async void onDeleteStudentCommand(object obj)
+        {
             Student student = obj as Student;
             int index = StudentList.IndexOf(student);
             if (index < 0) return;
@@ -738,6 +812,9 @@ namespace StudentsCourses.ViewModels
 
         public async Task Refresh()
         {
+            //show spinner
+            await SetupActivitySpinner(true);
+
             //when the page starting
             //
 
@@ -749,8 +826,33 @@ namespace StudentsCourses.ViewModels
             var courses = await SqliteDataStore.GetCoursesAsync();
             CourseList.AddRange(courses);
 
+            AvailableCourses.Clear();
+            AvailableCourses.Add(NO_COURSES);
+            if (CourseList.Count() != 0) 
+            {
+
+                foreach (Course course in CourseList)
+                {
+                    AvailableCourses.Add(course.CourseName);
+                }
+            }
+
+            //hide spinner
+            await SetupActivitySpinner(false);
+
         }
 
+        private static string NO_COURSES = "No courses";
+
+        private async Task SetupActivitySpinner(bool state)
+        {
+            ScrollsVisible = !state;
+            SpinnerActive = state;
+            SpinnerVisible = state;
+            OnPropertyChanged(nameof(ScrollsVisible));
+            OnPropertyChanged(nameof(SpinnerActive));
+            OnPropertyChanged(nameof(SpinnerVisible));
+        }
 
 
         public async Task PageAppearing()
@@ -771,12 +873,13 @@ namespace StudentsCourses.ViewModels
             }
         }
         private string _pageStudentName;
-        public string EntryStudentName {             
+        public string EntryStudentName
+        {
             set
             {
                 if (_pageStudentName != value)
                 {
-                    _pageStudentName = value;                  
+                    _pageStudentName = value;
                 }
             }
         }
@@ -811,7 +914,7 @@ namespace StudentsCourses.ViewModels
         {
             set
             {
-                if(_pageCourseName != value)
+                if (_pageCourseName != value)
                 {
                     _pageCourseName = value;
                 }
@@ -819,7 +922,7 @@ namespace StudentsCourses.ViewModels
         }
 
         private string _pageCourseLength;
-        public string  EntryCourseLength
+        public string EntryCourseLength
         {
             set
             {
@@ -831,7 +934,7 @@ namespace StudentsCourses.ViewModels
         }
 
         private string _pageCourseCost;
-       
+
 
         public string EntryCourseCost
         {
@@ -844,33 +947,78 @@ namespace StudentsCourses.ViewModels
             }
         }
 
-        
+        private string _pageStudentCourseSelected = NO_COURSES;
 
-       
+        public string SelectedCourse
+        {
+            get => _pageStudentCourseSelected;
+            set
+            {
+                if (_pageStudentCourseSelected != value) {
+                    _pageStudentCourseSelected = value;
+                }
+            }
+        }
 
+
+
+        private bool _spinnerActive = false;
+        public bool SpinnerActive
+        {
+            get => _spinnerActive;
+            set
+            {
+                _spinnerActive = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private bool _spinnerVisible = false;
+        public bool SpinnerVisible
+        {
+            get => _spinnerVisible;
+            set
+            {
+                _spinnerVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private bool _scrollsVisible = true;
+        public bool ScrollsVisible
+        {
+            get => _scrollsVisible;
+            set
+            {
+                _scrollsVisible = value;
+                OnPropertyChanged();
+            }
+        }
 
         private async void onCourseSubmitClicked()
         {
-            try { 
+            try
+            {
                 string name = _pageCourseName;
-                int length =  Int32.Parse(_pageCourseLength);
+                int length = Int32.Parse(_pageCourseLength);
                 double cost = Double.Parse(_pageCourseCost, CultureInfo.InvariantCulture.NumberFormat);
-                if(String.IsNullOrEmpty(name)) return;
+                if (String.IsNullOrEmpty(name)) return;
                 if (length <= 0) return;
-                if(cost < 0) return;
+                if (cost < 0) return;
                 var course = new Course() { CourseName = name, CourseLength = length, CourseCost = cost };
                 CourseList.Add(course);
 
                 await SqliteDataStore.SaveCourseAsync(course);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 return;
             }
         }
 
 
-        
+
 
     }
 }

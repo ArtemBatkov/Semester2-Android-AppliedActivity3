@@ -5,8 +5,7 @@
              xmlns:views="clr-namespace:StudentsCourses.Views"
              xmlns:viewmodels="clr-namespace:StudentsCourses.ViewModels"
              xmlns:models="clr-namespace:StudentsCourses.Models"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"              
-             xmlns:local="clr-namespace:StudentsCourses.Resources.Images">
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     
 
@@ -23,7 +22,6 @@
         
         
     </ContentPage.Resources>
-
     <ContentPage.BindingContext>
         <viewmodels:StudentsViewModel/>
     </ContentPage.BindingContext>
@@ -37,33 +35,52 @@
  
     <!-- <StackLayout Orientation="Horizontal"
                  HorizontalOptions="FillAndExpand">-->
-    <Grid ColumnSpacing="3" RowSpacing="10">
+    <Grid ColumnSpacing="3" RowSpacing="10"  RowDefinitions="1*,Auto" >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <ScrollView Grid.Column="0" Grid.Row="0" x:Name="StSV">
+
+       
+
+        <ScrollView  Grid.Row="0"  Grid.Column="0" x:Name="StSV" IsVisible="{Binding ScrollsVisible}">
             <StackLayout Spacing="30">
                 <Button Text="Add a new student" TextColor="White" BackgroundColor="Blue"
                         Command="{Binding ShowStudentFillForm}"
                         CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"/>
 
                 <!-- A blank of pop up card - start -->
-                <Grid  x:Name="cardfill" ColumnDefinitions="3*,1*" BackgroundColor="{StaticResource cardbg}" IsVisible="false" Margin="10">
+                <Grid  x:Name="cardfill" RowSpacing="0" RowDefinitions="Auto,Auto" ColumnDefinitions="3*,1*" BackgroundColor="{StaticResource cardbg}" IsVisible="false" Margin="10">
                    <!-- 3 Entries of the default card -->
-                    <StackLayout Grid.Row="0" Grid.Column="0" Padding="10">
+                    <StackLayout Grid.Row="0" Grid.Column="0" Padding="10" >
                         <Label Text="A name can't be empty or a whitespace" TextColor="White" Background="Red" IsVisible="false"/>
                         <Entry Placeholder="Insert the student Name"  Text="{Binding EntryStudentName}" TextColor="Black"/>
                         <Label Text="A surname can't be empty or a whitespace" TextColor="White" Background="Red" IsVisible="false"/>
                         <Entry Placeholder="Insert the student Surname" Text="{Binding EntryStudentSurname}" TextColor="Black"/>
                         <Label Text="A GPA can't be negative or more than 4" TextColor="White" Background="Red" IsVisible="false"/>
                         <Entry Placeholder="Insert the student GPA score" Text="{Binding EntryStudentGPA}" TextColor="Black"/>
+                    
+                        <!-- Picker -->
+                        <Picker x:Name="courses"
+                            TitleColor="Black"                            
+                            TextColor="DarkMagenta"
+                            FontAttributes="Bold"
+                            FontSize="16"                           
+                            Title="Select a course"                                   
+                            ItemsSource="{Binding AvailableCourses}" 
+                            BackgroundColor="black"
+                            SelectedItem="{Binding SelectedCourse, Mode=TwoWay}"
+                            />
+
+
+
+
                     </StackLayout>
                     
                     <!-- Save a new record or delete it : buttons-->
-                    
-                    <StackLayout Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" Padding="10" Spacing="10">
+
+                    <StackLayout Grid.Row="0" Grid.Column="1"    HorizontalOptions="Center" Padding="10" Spacing="10">
                   
                         <ImageButton x:Name="submit"   Grid.Row="0" Grid.Column="1"    
                                      BackgroundColor="{Binding BackgroundColor,Source={x:Reference cardfill}}"
@@ -85,6 +102,21 @@
                                      Command="{Binding CancelStudent}"
                                      CommandParameter="{Binding Source={RelativeSource AncestorType={x:Type Grid}}}"/>
                     </StackLayout>
+
+
+
+                    <!--Photo card - start-->
+                    <Grid x:Name="photogrid" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                          RowDefinitions="*,Auto" Margin="10,0,10,0"
+                          BackgroundColor="OrangeRed">
+                        <Button Grid.Row="0" Grid.Column ="0" Text="Take a photo" Command="{Binding CapturePhoto}"/>
+                        <Image Grid.Row="1" Grid.Column ="0" Source="{Binding Photo}" Aspect="Fill"
+                               
+                               />
+                    </Grid>
+                    <!--Photo card - end-->
+
+
                 </Grid>
                 <!-- A blank of pop up card - end -->
 
@@ -92,8 +124,7 @@
             <!-- CollectionView Students - start -->    
             <CollectionView 
                         x:Name="CVStudents"                        
-                        ItemsSource="{Binding StudentList}"
-                        Header="Scroll left to delete"                        
+                        ItemsSource="{Binding StudentList}"                      
                         Margin="10,0,10,0">
                     
                     <!-- COllectionView - Spacing-->
@@ -122,7 +153,7 @@
 
                                 <!-- Card Student Border - start -->
                                 <Border x:Name ="bordercard" StrokeShape="RoundRectangle 10 10 10 10" BackgroundColor="{StaticResource cardbg}">
-                                    <Grid x:Name="grd"  ColumnDefinitions="3*,1*"  RowSpacing="10">
+                                    <Grid x:Name="grd"  ColumnDefinitions="3*,1*,*"   RowSpacing="10">
                                         <!--StackLayout of Entries - start-->
                                         <StackLayout Grid.Row="0" Grid.Column="0" x:Name="StudentStack" 
                                                  Margin="20">
@@ -135,10 +166,11 @@
                                                IsEnabled="False"
                                                Margin="10"/>                                               
                                             <Entry Text="{Binding StudentId}" IsVisible="false"/>
-                                        </StackLayout>
+                                        <Label Text="{Binding Course, StringFormat='Was enrolled to {0}'}"  TextColor="Black" BackgroundColor="GreenYellow" IsVisible="{Binding IsShowEnrollement}"/>
+                                    </StackLayout>
                                         <!--StackLayout of Entries - end-->
 
-                                        <Grid Grid.Row="0" Grid.Column="1" RowSpacing="10" RowDefinitions="1*,1*,1*" VerticalOptions="Center">
+                                        <Grid Grid.Row="0" Grid.Column="1" RowSpacing="10" RowDefinitions="1*,1*,1*,1*" VerticalOptions="Center">
                                             <!-- ImageButton Submit - start -->
                                             <ImageButton x:Name="submit"   Grid.Row="0" Grid.Column="0"  
                                                          BackgroundColor="{Binding BackgroundColor,Source={x:Reference bordercard}}"
@@ -195,10 +227,27 @@
                                                          Source="delete.png">                                                
                                             </ImageButton>
                                             <!-- ImageButton Delete - end -->
-                                            
-                                        </Grid>
+
+
+                                        <!-- Picker -->
+                                        <Picker x:Name="coursesCard"
+                                                TitleColor="Black"                            
+                                                TextColor="DarkMagenta"
+                                                FontAttributes="Bold"
+                                                FontSize="12"                                                                                  
+                                                ItemsSource="{Binding AvailableCourses}" 
+                                                BackgroundColor="black"
+                                                SelectedItem="{Binding SelectedCourse, Mode=TwoWay}"
+                                                IsVisible="false"
+                                                HorizontalOptions="Center"
+                                                Grid.Row="3" Grid.Column="0"
+                                                />
 
                                     </Grid>
+
+                                   
+
+                                </Grid>
                                 </Border>
                                 <!-- Card Student Border - end -->
                            <!-- </SwipeView> -->
@@ -216,7 +265,7 @@
         
         <!-- COURSES -->
 
-        <ScrollView Grid.Column="1" Grid.Row="0">
+        <ScrollView Grid.Row="0" Grid.Column="1"  IsVisible="{Binding ScrollsVisible}">
             <StackLayout Spacing="30">
                 <Button Text="Add a new course" TextColor="White" BackgroundColor="Blue"
                         Command="{Binding ShowCourseFillForm}"
@@ -232,6 +281,7 @@
                         <Entry Placeholder="Insert a length of a course" Text="{Binding EntryCourseLength}" TextColor="Black" Keyboard="Telephone"/>
                         <Label Text="Cost can't be negative or empty" TextColor="White" Background="Red" IsVisible="false"/>
                         <Entry Placeholder="Insert the course cost" Text="{Binding EntryCourseCost}" TextColor="Black" Keyboard="Numeric"/>
+                        
                     </StackLayout>
 
                     <!-- Save a new record or delete it : buttons-->
@@ -260,15 +310,14 @@
                     </StackLayout>
                 </Grid>
                 <!-- A blank of pop up card - end -->
-                
-                
-              
+
+
+
 
                 <CollectionView 
                        x:Name="CVCourses"
                        Margin="10,0,10,0"
-                       ItemsSource="{Binding CourseList}" 
-                       Header="Scroll right to delete">
+                       ItemsSource="{Binding CourseList}">
 
                     <!-- COllectionView - Spacing-->
                     <CollectionView.ItemsLayout>
@@ -279,7 +328,7 @@
                     <CollectionView.ItemTemplate >
                         <DataTemplate>
                             <!-- SWIPE WORKS ONLY ON ANDROID-->
-                           <!-- <SwipeView Threshold="200">
+                            <!-- <SwipeView Threshold="200">
                                 <SwipeView.RightItems>
                                     <SwipeItems>
                                         <SwipeItem 
@@ -293,8 +342,8 @@
                                 </SwipeView.RightItems>
                             </SwipeView> -->
                             <!-- SWIPE WORKS ONLY ON ANDROID-->
-                            
-                            
+
+
                             <!-- Card Course Border - start -->
                             <Border x:Name ="bordercardcourse" StrokeShape="RoundRectangle 10 10 10 10" BackgroundColor="{StaticResource cardbg}">
                                 <Grid ColumnDefinitions="3*,1*"  RowSpacing="10">
@@ -307,7 +356,7 @@
                                         <Entry Placeholder="Insert a length of a course" Text="{Binding CourseLength}" TextColor="Black" Keyboard="Telephone" IsEnabled="False"/>
                                         <Label Text="Cost can't be negative or empty" TextColor="White" Background="Red" IsVisible="false"/>
                                         <Entry Placeholder="Insert the course cost" Text="{Binding CourseCost}" TextColor="Black" Keyboard="Numeric" IsEnabled="False"/>
-                                        <Entry Text="{Binding CourseId}" IsVisible="true" IsEnabled="False" TextColor="DarkMagenta"/>
+                                        <Entry Text="{Binding CourseId}" IsVisible="false" IsEnabled="False" TextColor="DarkMagenta"/>
                                     </StackLayout>
                                     <!--StackLayout of Entries - end-->
 
@@ -390,8 +439,17 @@
                 </CollectionView>
             </StackLayout>
         </ScrollView>
-   
+
+        <StackLayout Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"                     
+                     IsVisible="{Binding SpinnerVisible}" HorizontalOptions="Center">
+            <ActivityIndicator IsRunning="{Binding SpinnerActive}" Color="Orange" />
+            <Label Text="Uploading the data, please be patient and wait..."/>
+        </StackLayout>
+
+
     </Grid>
+    
+    
     
     <!--
     </StackLayout> -->
